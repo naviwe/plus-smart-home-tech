@@ -11,7 +11,7 @@ import ru.yandex.practicum.telemetry.service.TelemetryService;
 
 @Slf4j
 @RestController
-@RequestMapping
+@RequestMapping("/events")
 @RequiredArgsConstructor
 public class TelemetryController {
     private final TelemetryService telemetryService;
