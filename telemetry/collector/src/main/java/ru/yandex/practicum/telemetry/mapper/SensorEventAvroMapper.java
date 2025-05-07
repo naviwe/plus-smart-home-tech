@@ -1,9 +1,9 @@
 package ru.yandex.practicum.telemetry.mapper;
 
+
 import ru.yandex.practicum.kafka.telemetry.event.*;
 import ru.yandex.practicum.telemetry.model.*;
 import ru.yandex.practicum.telemetry.model.SensorEvent;
-
 
 public class SensorEventAvroMapper {
 

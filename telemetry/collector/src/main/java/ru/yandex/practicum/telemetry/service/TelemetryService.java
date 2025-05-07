@@ -1,12 +1,12 @@
 package ru.yandex.practicum.telemetry.service;
 
-import com.example.avro.HubEventAvro;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
+import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.telemetry.mapper.HubEventAvroMapper;
 import ru.yandex.practicum.telemetry.mapper.SensorEventAvroMapper;
 import ru.yandex.practicum.telemetry.model.HubEvent;

@@ -1,4 +1,4 @@
-@namespace("com.example.avro")
+@namespace("ru.yandex.practicum.kafka.telemetry.event")
 protocol HubEvents {
 
 	enum DeviceTypeAvro {

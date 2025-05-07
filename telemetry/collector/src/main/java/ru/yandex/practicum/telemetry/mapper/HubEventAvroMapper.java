@@ -1,6 +1,6 @@
 package ru.yandex.practicum.telemetry.mapper;
 
-import com.example.avro.*;
+import ru.yandex.practicum.kafka.telemetry.event.*;
 import ru.yandex.practicum.telemetry.model.*;
 
 import java.util.List;
