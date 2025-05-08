@@ -1,12 +1,11 @@
 package ru.yandex.practicum.telemetry.service;
 
 import jakarta.annotation.PreDestroy;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.avro.specific.SpecificRecordBase;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
@@ -19,7 +18,6 @@ import ru.yandex.practicum.telemetry.model.SensorEvent;
 import java.util.Properties;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class TelemetryService {
 
@@ -28,12 +26,10 @@ public class TelemetryService {
 
     public TelemetryService(KafkaConfig kafkaConfig) {
         this.kafkaConfig = kafkaConfig;
-
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfig.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, kafkaConfig.getProducer().getKeySerializer());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, kafkaConfig.getProducer().getValueSerializer());
-
         this.producer = new KafkaProducer<>(props);
     }
 
@@ -75,6 +71,8 @@ public class TelemetryService {
 
     @PreDestroy
     public void close() {
+        log.info("Closing KafkaProducer");
         producer.close();
+        log.info("KafkaProducer closed");
     }
 }
