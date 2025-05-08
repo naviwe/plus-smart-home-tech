@@ -15,6 +15,7 @@ import ru.yandex.practicum.telemetry.mapper.SensorEventAvroMapper;
 import ru.yandex.practicum.telemetry.model.HubEvent;
 import ru.yandex.practicum.telemetry.model.SensorEvent;
 
+import java.time.Duration;
 import java.util.Properties;
 
 @Service
@@ -72,7 +73,9 @@ public class TelemetryService {
     @PreDestroy
     public void close() {
         log.info("Closing KafkaProducer");
-        producer.close();
-        log.info("KafkaProducer closed");
+        producer.flush();
+        producer.close(Duration.ofMillis(10));
+        log.info("KafkaProducer closed successfully");
+
     }
 }
