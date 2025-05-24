@@ -13,7 +13,7 @@ public class GrpcHubEventMapper {
 
     public static HubEventAvro toAvro(HubEventProto event) {
         String hubId = event.getHubId();
-        long timestamp = event.getTimestamp().getSeconds() * 1000L
+        long timestampMillis = event.getTimestamp().getSeconds() * 1000L
                 + event.getTimestamp().getNanos() / 1_000_000;
 
         return switch (event.getPayloadCase()) {
@@ -23,7 +23,7 @@ public class GrpcHubEventMapper {
                         .setId(data.getId())
                         .setType(DeviceTypeAvro.valueOf(data.getType().name()))
                         .build();
-                yield build(hubId, timestamp, payload);
+                yield build(hubId, timestampMillis, payload);
             }
 
             case DEVICE_REMOVED -> {
@@ -31,7 +31,7 @@ public class GrpcHubEventMapper {
                 DeviceRemovedEventAvro payload = DeviceRemovedEventAvro.newBuilder()
                         .setId(data.getId())
                         .build();
-                yield build(hubId, timestamp, payload);
+                yield build(hubId, timestampMillis, payload);
             }
 
             case SCENARIO_ADDED -> {
@@ -47,7 +47,7 @@ public class GrpcHubEventMapper {
                         .setConditions(conditions)
                         .setActions(actions)
                         .build();
-                yield build(hubId, timestamp, payload);
+                yield build(hubId, timestampMillis, payload);
             }
 
             case SCENARIO_REMOVED -> {
@@ -55,7 +55,7 @@ public class GrpcHubEventMapper {
                 ScenarioRemovedEventAvro payload = ScenarioRemovedEventAvro.newBuilder()
                         .setName(data.getName())
                         .build();
-                yield build(hubId, timestamp, payload);
+                yield build(hubId, timestampMillis, payload);
             }
 
             default -> throw new IllegalArgumentException(String.format("Неподдерживаемый тип события хаба: %s",
@@ -63,10 +63,10 @@ public class GrpcHubEventMapper {
         };
     }
 
-    private static HubEventAvro build(String hubId, long timestamp, Object payload) {
+    private static HubEventAvro build(String hubId, long timestampMillis, Object payload) {
         return HubEventAvro.newBuilder()
                 .setHubId(hubId)
-                .setTimestamp(Instant.ofEpochSecond(timestamp))
+                .setTimestamp(Instant.ofEpochMilli(timestampMillis))
                 .setPayload(payload)
                 .build();
     }

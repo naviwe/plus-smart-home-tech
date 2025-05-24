@@ -10,7 +10,7 @@ public class GrpcSensorEventMapper {
     public static SensorEventAvro toAvro(SensorEventProto event) {
         String id = event.getId();
         String hubId = event.getHubId();
-        long timestamp = event.getTimestamp().getSeconds() * 1000L
+        long timestampMillis = event.getTimestamp().getSeconds() * 1000L
                 + event.getTimestamp().getNanos() / 1_000_000;
 
         return switch (event.getPayloadCase()) {
@@ -21,7 +21,7 @@ public class GrpcSensorEventMapper {
                         .setHumidity(data.getHumidity())
                         .setCo2Level(data.getCo2Level())
                         .build();
-                yield build(id, hubId, timestamp, payload);
+                yield build(id, hubId, timestampMillis, payload);
             }
 
             case LIGHT_SENSOR_EVENT -> {
@@ -30,7 +30,7 @@ public class GrpcSensorEventMapper {
                         .setLinkQuality(data.getLinkQuality())
                         .setLuminosity(data.getLuminosity())
                         .build();
-                yield build(id, hubId, timestamp, payload);
+                yield build(id, hubId, timestampMillis, payload);
             }
 
             case MOTION_SENSOR_EVENT -> {
@@ -40,7 +40,7 @@ public class GrpcSensorEventMapper {
                         .setMotion(data.getMotion())
                         .setVoltage(data.getVoltage())
                         .build();
-                yield build(id, hubId, timestamp, payload);
+                yield build(id, hubId, timestampMillis, payload);
             }
 
             case SWITCH_SENSOR_EVENT -> {
@@ -48,7 +48,7 @@ public class GrpcSensorEventMapper {
                 SwitchSensorAvro payload = SwitchSensorAvro.newBuilder()
                         .setState(data.getState())
                         .build();
-                yield build(id, hubId, timestamp, payload);
+                yield build(id, hubId, timestampMillis, payload);
             }
 
             case TEMPERATURE_SENSOR_EVENT -> {
@@ -57,7 +57,7 @@ public class GrpcSensorEventMapper {
                         .setTemperatureC(data.getTemperatureC())
                         .setTemperatureF(data.getTemperatureF())
                         .build();
-                yield build(id, hubId, timestamp, payload);
+                yield build(id, hubId, timestampMillis, payload);
             }
 
             default -> throw new IllegalArgumentException(String.format("Неподдерживаемый тип события датчика: %s",
@@ -65,11 +65,11 @@ public class GrpcSensorEventMapper {
         };
     }
 
-    private static SensorEventAvro build(String id, String hubId, long timestamp, Object payload) {
+    private static SensorEventAvro build(String id, String hubId, long timestampMillis, Object payload) {
         return SensorEventAvro.newBuilder()
                 .setId(id)
                 .setHubId(hubId)
-                .setTimestamp(Instant.ofEpochSecond(timestamp))
+                .setTimestamp(Instant.ofEpochMilli(timestampMillis))
                 .setPayload(payload)
                 .build();
     }
