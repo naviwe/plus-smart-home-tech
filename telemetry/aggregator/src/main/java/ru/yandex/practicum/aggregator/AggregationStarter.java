@@ -21,17 +21,17 @@ public class AggregationStarter {
     private final SensorSnapshotService snapshotService;
 
     public void start() {
-        log.info("Инициализация подписки на топик telemetry.sensors.v1");
+        log.info("Initializing subscription to topic telemetry.sensors.v1");
         consumer.subscribe(List.of("telemetry.sensors.v1"));
 
         try {
             while (true) {
-                log.debug("Ожидание новых сообщений из Kafka...");
+                log.debug("Waiting for new Kafka messages...");
                 var records = consumer.poll(Duration.ofMillis(100));
-                log.debug("Получено {} сообщений", records.count());
+                log.debug("Received {} messages", records.count());
                 for (var record : records) {
                     var event = record.value();
-                    log.debug("Обработка события от датчика: {}", event);
+                    log.debug("Processing sensor event: {}", event);
                     try {
                         snapshotService.updateSnapshot(event).ifPresent(snapshot -> {
                             try {
@@ -40,54 +40,53 @@ public class AggregationStarter {
                                         snapshot.getHubId(),
                                         snapshot
                                 );
-                                log.info("Отправлен снепшот хаба: {}", snapshot.getHubId());
+                                log.info("Sent hub snapshot: {}", snapshot.getHubId());
                             } catch (Exception e) {
-                                log.error("Ошибка при отправке снепшота в Kafka: hubId={}", snapshot.getHubId(), e);
+                                log.error("Error sending snapshot to Kafka: hubId={}", snapshot.getHubId(), e);
                             }
                         });
                     } catch (Exception e) {
-                        log.error("Ошибка при обновлении снепшота по событию: {}", event, e);
+                        log.error("Error updating snapshot for event: {}", event, e);
                     }
                 }
                 try {
                     consumer.commit();
-                    log.debug("Коммит смещений выполнен успешно");
+                    log.debug("Offsets committed successfully");
                 } catch (Exception e) {
-                    log.error("Ошибка при коммите смещений", e);
+                    log.error("Error committing offsets", e);
                 }
             }
 
         } catch (WakeupException e) {
-            log.info("Получен сигнал завершения (WakeupException)");
+            log.info("Received shutdown signal (WakeupException)");
         } catch (Exception e) {
-            log.error("Критическая ошибка во время обработки событий", e);
+            log.error("Critical error during event processing", e);
         } finally {
             try {
                 producer.flush();
-                log.info("Продюсер сбросил данные из буфера");
+                log.info("Producer flushed pending data");
 
                 consumer.commit();
-                log.info("Финальный коммит смещений выполнен");
+                log.info("Final offsets commit completed");
 
             } catch (Exception e) {
-                log.error("Ошибка при финальной очистке ресурсов", e);
+                log.error("Error during final resource cleanup", e);
             } finally {
                 try {
-                    log.info("Закрытие продюсера...");
+                    log.info("Closing producer...");
                     producer.close();
-                    log.info("Продюсер успешно закрыт");
+                    log.info("Producer closed successfully");
                 } catch (Exception e) {
-                    log.error("Ошибка при закрытии продюсера", e);
+                    log.error("Error closing producer", e);
                 }
                 try {
-                    log.info("Закрытие консьюмера...");
+                    log.info("Closing consumer...");
                     consumer.close();
-                    log.info("Консьюмер успешно закрыт");
+                    log.info("Consumer closed successfully");
                 } catch (Exception e) {
-                    log.error("Ошибка при закрытии консьюмера", e);
+                    log.error("Error closing consumer", e);
                 }
             }
         }
     }
-
 }

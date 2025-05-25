@@ -34,7 +34,7 @@ public class SnapshotProcessor {
     KafkaSnapshotConsumer consumer;
 
     public void start() {
-        log.info("Инициализация подписки на топик telemetry.snapshots.v1");
+        log.info("Initializing subscription to topic telemetry.snapshots.v1");
         consumer.subscribe(List.of("telemetry.snapshots.v1"));
         try {
             while (true) {
@@ -43,67 +43,67 @@ public class SnapshotProcessor {
                 if (!records.isEmpty()) {
                     for (var record : records) {
                         var snapshot = record.value();
-                        log.debug("Обработка снепшота: {}", snapshot);
+                        log.debug("Processing snapshot: {}", snapshot);
                         try {
                             process(snapshot);
                         } catch (Exception e) {
-                            log.error("Ошибка при обработке снепшота: {}", snapshot, e);
+                            log.error("Error processing snapshot: {}", snapshot, e);
                         }
                     }
                     try {
                         consumer.commit();
                     } catch (Exception e) {
-                        log.error("Ошибка при коммите смещений", e);
+                        log.error("Error committing offsets", e);
                     }
                 }
             }
         } catch (WakeupException e) {
-            log.info("Получен сигнал завершения (WakeupException)");
+            log.info("Received shutdown signal (WakeupException)");
         } catch (Exception e) {
-            log.error("Критическая ошибка во время обработки событий", e);
+            log.error("Critical error during event processing", e);
         } finally {
             try {
-                log.info("Закрытие консьюмера");
+                log.info("Closing consumer");
                 consumer.close();
-                log.info("Консьюмер успешно закрыт");
+                log.info("Consumer closed successfully");
             } catch (Exception e) {
-                log.error("Ошибка при закрытии консьюмера", e);
+                log.error("Error closing consumer", e);
             }
         }
     }
 
     public void process(SensorsSnapshotAvro snapshot) {
-        log.warn("Сработал метод process() для снапшота: {}", snapshot);
+        log.warn("process() method triggered for snapshot: {}", snapshot);
         String hubId = snapshot.getHubId();
         Instant ts = snapshot.getTimestamp();
 
-        log.info("Обработка снапшота для хаба {} в {}", hubId, ts);
-        log.debug("Сенсоры в снапшоте: {}", snapshot.getSensorsState().keySet());
+        log.info("Processing snapshot for hub {} at {}", hubId, ts);
+        log.debug("Sensors in snapshot: {}", snapshot.getSensorsState().keySet());
         snapshot.getSensorsState()
                 .forEach((k, v) -> log.debug("  [{}] → {}", k, v.getData().getClass()));
 
         var scenarios = scenarioRepository.findAllByHubId(hubId);
-        log.debug("Найдено {} сценариев для хаба {}", scenarios.size(), hubId);
+        log.debug("Found {} scenarios for hub {}", scenarios.size(), hubId);
 
         for (Scenario scenario : scenarios) {
-            log.debug("Проверка сценария: {}", scenario.getName());
+            log.debug("Checking scenario: {}", scenario.getName());
             var conditions = scenarioConditionRepository.findAllByScenarioId(scenario.getId());
 
-            log.debug("Условия сценария ({}): {}", conditions.size(), conditions);
+            log.debug("Scenario conditions ({}): {}", conditions.size(), conditions);
             if (isSatisfied(conditions, snapshot)) {
-                log.info("Сценарий '{}' активирован", scenario.getName());
+                log.info("Scenario '{}' activated", scenario.getName());
                 var actions = scenarioActionRepository.findAllByScenarioId(scenario.getId());
 
                 for (ScenarioAction action : actions) {
                     String sensorId = action.getSensor().getId();
                     String type = action.getAction().getType();
                     Integer value = action.getAction().getValue();
-                    log.info("Отправка команды: sensorId={}, type={}, value={}", sensorId, type, value);
-                    log.warn("Условия выполнены, отправляем команду: {}", action);
+                    log.info("Sending command: sensorId={}, type={}, value={}", sensorId, type, value);
+                    log.warn("Conditions met, sending command: {}", action);
                     client.sendDeviceAction(hubId, scenario.getName(), sensorId, value, type);
                 }
             } else {
-                log.warn("Условия не выполнены: {}", scenario.getName());
+                log.warn("Conditions not met: {}", scenario.getName());
             }
         }
     }
@@ -114,14 +114,14 @@ public class SnapshotProcessor {
             var state = snapshot.getSensorsState().get(sensorId);
 
             if (state == null) {
-                log.warn("Данные по сенсору '{}' отсутствуют в снапшоте", sensorId);
-                log.warn("Сенсоры из снапшота: {}", snapshot.getSensorsState().keySet());
+                log.warn("Sensor data missing for '{}' in snapshot", sensorId);
+                log.warn("Sensors in snapshot: {}", snapshot.getSensorsState().keySet());
                 return false;
             }
 
-            log.debug("Найден сенсор '{}': {}", sensorId, state);
+            log.debug("Found sensor '{}': {}", sensorId, state);
             boolean conditionMet = evaluateCondition(condition.getCondition(), state.getData());
-            log.debug("Условие по сенсору {}: {}", sensorId, conditionMet ? "выполнено" : "не выполнено");
+            log.debug("Condition for sensor {}: {}", sensorId, conditionMet ? "met" : "not met");
 
             if (!conditionMet) return false;
         }
@@ -132,11 +132,11 @@ public class SnapshotProcessor {
         String type = condition.getType();
 
         if (data == null) {
-            log.warn("Данные сенсора отсутствуют (data == null) для условия: {}", condition);
+            log.warn("Sensor data is null (data == null) for condition: {}", condition);
             return false;
         }
 
-        log.debug("Тип данных из снапшота: {}", data.getClass().getName());
+        log.debug("Snapshot data type: {}", data.getClass().getName());
         String operation = condition.getOperation();
         Integer expectedValue = condition.getValue();
 
@@ -145,19 +145,19 @@ public class SnapshotProcessor {
             return false;
         }
 
-        log.debug("Проверка условия: type={}, operation={}, expected={}", type, operation, expectedValue);
+        log.debug("Checking condition: type={}, operation={}, expected={}", type, operation, expectedValue);
         switch (type) {
             case "LUMINOSITY" -> {
-                log.debug("Проверка типа LUMINOSITY для data={}", data.getClass().getName());
+                log.debug("Checking LUMINOSITY type for data={}", data.getClass().getName());
                 if (data instanceof LightSensorAvro light) {
                     return compareAndLog("LUMINOSITY", light.getLuminosity(), expectedValue, operation);
                 } else {
-                    log.warn("Ожидался LightSensorAvro, но пришёл {}", data.getClass().getName());
+                    log.warn("Expected LightSensorAvro but got {}", data.getClass().getName());
                     return false;
                 }
             }
             case "TEMPERATURE" -> {
-                log.debug("Проверка типа TEMPERATURE для data={}", data.getClass().getName());
+                log.debug("Checking TEMPERATURE type for data={}", data.getClass().getName());
                 if (data instanceof ClimateSensorAvro climate) {
                     return compareAndLog("TEMPERATURE (climate)", climate.getTemperatureC(), expectedValue,
                             operation);
@@ -168,53 +168,52 @@ public class SnapshotProcessor {
                             expectedValue, operation);
                     return resultC || resultF;
                 } else {
-                    log.warn("Ожидался ClimateSensorAvro или TemperatureSensorAvro, но пришёл {}",
+                    log.warn("Expected ClimateSensorAvro or TemperatureSensorAvro but got {}",
                             data.getClass().getName());
                     return false;
                 }
             }
             case "CO2LEVEL" -> {
-                log.debug("Проверка типа CO2LEVEL для data={}", data.getClass().getName());
+                log.debug("Checking CO2LEVEL type for data={}", data.getClass().getName());
                 if (data instanceof ClimateSensorAvro climate) {
                     return compareAndLog("CO2LEVEL", climate.getCo2Level(), expectedValue, operation);
                 } else {
-                    log.warn("Ожидался ClimateSensorAvro, но пришёл {}", data.getClass().getName());
+                    log.warn("Expected ClimateSensorAvro but got {}", data.getClass().getName());
                     return false;
                 }
             }
             case "HUMIDITY" -> {
-                log.debug("Проверка типа HUMIDITY для data={}", data.getClass().getName());
+                log.debug("Checking HUMIDITY type for data={}", data.getClass().getName());
                 if (data instanceof ClimateSensorAvro climate) {
                     return compareAndLog("HUMIDITY", climate.getHumidity(), expectedValue, operation);
                 } else {
-                    log.warn("Ожидался ClimateSensorAvro, но пришёл {}", data.getClass().getName());
+                    log.warn("Expected ClimateSensorAvro but got {}", data.getClass().getName());
                     return false;
                 }
             }
             case "MOTION" -> {
-                log.debug("Проверка типа MOTION для data={}", data.getClass().getName());
+                log.debug("Checking MOTION type for data={}", data.getClass().getName());
                 if (data instanceof MotionSensorAvro motion) {
                     return compareAndLog("MOTION", motion.getMotion() ? 1 : 0, expectedValue, operation);
                 } else {
-                    log.warn("Ожидался MotionSensorAvro, но пришёл {}", data.getClass().getName());
+                    log.warn("Expected MotionSensorAvro but got {}", data.getClass().getName());
                     return false;
                 }
             }
             case "SWITCH" -> {
-                log.debug("Проверка типа SWITCH для data={}", data.getClass().getName());
+                log.debug("Checking SWITCH type for data={}", data.getClass().getName());
                 if (data instanceof SwitchSensorAvro sw) {
                     return compareAndLog("SWITCH", sw.getState() ? 1 : 0, expectedValue, operation);
                 } else {
-                    log.warn("Ожидался SwitchSensorAvro, но пришёл {}", data.getClass().getName());
+                    log.warn("Expected SwitchSensorAvro but got {}", data.getClass().getName());
                     return false;
                 }
             }
             default -> {
-                log.warn("Неизвестный тип условия: {}", type);
+                log.warn("Unknown condition type: {}", type);
                 return false;
             }
         }
-
     }
 
     private boolean compare(int actual, int expected, String operation) {
@@ -228,7 +227,7 @@ public class SnapshotProcessor {
 
     private boolean compareAndLog(String label, int actual, int expected, String operation) {
         boolean result = compare(actual, expected, operation);
-        log.debug("{}: {} {} {} → {}", label, actual, expected, operation, result ? "выполнено" : "не выполнено");
+        log.debug("{}: {} {} {} → {}", label, actual, operation, expected, result ? "met" : "not met");
         return result;
     }
 }

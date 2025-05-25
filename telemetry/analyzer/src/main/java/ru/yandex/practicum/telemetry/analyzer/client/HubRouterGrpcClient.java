@@ -23,15 +23,15 @@ public class HubRouterGrpcClient {
 
     public void sendDeviceAction(String hubId, String scenarioName, String sensorId, Integer value, String type) {
         try {
-            log.info("Отправка команды устройству по gRPC: hubId={}, scenario={}, sensorId={}, value={}, type={}",
+            log.info("Sending device command via gRPC: hubId={}, scenario={}, sensorId={}, value={}, type={}",
                     hubId, scenarioName, sensorId, value, type);
             DeviceActionProto action = grpcDeviceActionMapper.toDeviceAction(sensorId, type, value);
             DeviceActionRequest request = grpcDeviceActionMapper.toDeviceActionRequest(hubId, scenarioName, action);
-            log.warn("Условия выполнены, отправляем команду: {}", action);
+            log.warn("Conditions met, sending command: {}", action);
             hubRouterStub.handleDeviceAction(request);
-            log.info("Команда успешно отправлена через gRPC");
+            log.info("Command successfully sent via gRPC");
         } catch (Exception e) {
-            log.error("Ошибка при отправке команды в gRPC-сервис: {}", e.getMessage(), e);
+            log.error("Error sending command to gRPC service: {}", e.getMessage(), e);
         }
     }
 }

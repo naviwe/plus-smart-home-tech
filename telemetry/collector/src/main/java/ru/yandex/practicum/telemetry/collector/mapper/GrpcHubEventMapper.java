@@ -58,7 +58,7 @@ public class GrpcHubEventMapper {
                 yield build(hubId, timestampMillis, payload);
             }
 
-            default -> throw new IllegalArgumentException(String.format("Неподдерживаемый тип события хаба: %s",
+            default -> throw new IllegalArgumentException(String.format("Unsupported hub event type: %s",
                     event.getPayloadCase()));
         };
     }

@@ -60,7 +60,7 @@ public class GrpcSensorEventMapper {
                 yield build(id, hubId, timestampMillis, payload);
             }
 
-            default -> throw new IllegalArgumentException(String.format("Неподдерживаемый тип события датчика: %s",
+            default -> throw new IllegalArgumentException(String.format("Unsupported hub event type: %s",
                     event.getPayloadCase()));
         };
     }
