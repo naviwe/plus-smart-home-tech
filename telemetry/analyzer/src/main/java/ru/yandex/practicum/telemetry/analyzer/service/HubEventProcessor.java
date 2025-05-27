@@ -2,10 +2,10 @@ package ru.yandex.practicum.telemetry.analyzer.service;
 
 import jakarta.annotation.PostConstruct;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.errors.WakeupException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.kafka.telemetry.event.*;
 import ru.yandex.practicum.telemetry.analyzer.kafka.KafkaHubEventConsumer;
@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class HubEventProcessor implements Runnable {
@@ -33,6 +32,31 @@ public class HubEventProcessor implements Runnable {
     ActionRepository actionRepository;
     ScenarioConditionRepository scenarioConditionRepository;
     ScenarioActionRepository scenarioActionRepository;
+    String hubsTopic;
+
+    public HubEventProcessor(
+            KafkaHubEventConsumer consumer,
+            SensorRepository sensorRepository,
+            ScenarioRepository scenarioRepository,
+            ConditionRepository conditionRepository,
+            ActionRepository actionRepository,
+            ScenarioConditionRepository scenarioConditionRepository,
+            ScenarioActionRepository scenarioActionRepository,
+            @Value("${kafka.topics.hubs}") String hubsTopic) {
+        this.consumer = consumer;
+        this.sensorRepository = sensorRepository;
+        this.scenarioRepository = scenarioRepository;
+        this.conditionRepository = conditionRepository;
+        this.actionRepository = actionRepository;
+        this.scenarioConditionRepository = scenarioConditionRepository;
+        this.scenarioActionRepository = scenarioActionRepository;
+        this.hubsTopic = hubsTopic;
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            log.info("Shutdown hook triggered, waking up hub event consumer...");
+            consumer.wakeup();
+        }));
+    }
 
     @PostConstruct
     public void init() {

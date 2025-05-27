@@ -1,16 +1,3 @@
-grpc:
-  client:
-    hub-router:
-      address: 'static://localhost:59090'
-      enableKeepAlive: true
-      keepAliveWithoutCalls: true
-      negotiationType: plaintext
-
-logging:
-  level:
-    root: INFO
-    ru.yandex.practicum.telemetry.analyzer: DEBUG
-
 spring:
   application:
     name: analyzer
@@ -25,3 +12,31 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  kafka:
+    hub-consumer:
+      bootstrap-servers: localhost:9092
+      group-id: analyzer-hub-event-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: ru.practicum.telemetry.deserialization.HubEventDeserializer
+      enable-auto-commit: false
+    snapshot-consumer:
+      bootstrap-servers: localhost:9092
+      group-id: analyzer-snapshot-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: ru.practicum.telemetry.deserialization.SensorsSnapshotDeserializer
+      enable-auto-commit: false
+kafka:
+  topics:
+    hubs: telemetry.hubs.v1
+    snapshots: telemetry.snapshots.v1
+grpc:
+  client:
+    hub-router:
+      address: 'static://localhost:59090'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+logging:
+  level:
+    root: INFO
+    ru.yandex.practicum.telemetry.analyzer: DEBUG

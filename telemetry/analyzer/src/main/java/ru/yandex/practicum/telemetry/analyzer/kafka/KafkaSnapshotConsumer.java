@@ -4,7 +4,7 @@ import jakarta.annotation.PreDestroy;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.practicum.telemetry.deserialization.SensorsSnapshotDeserializer;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
@@ -18,18 +18,19 @@ public class KafkaSnapshotConsumer {
 
     private final KafkaConsumer<String, SensorsSnapshotAvro> consumer;
 
-    public KafkaSnapshotConsumer() {
-        this.consumer = new KafkaConsumer<>(consumerProperties());
-    }
-
-    private Properties consumerProperties() {
+    public KafkaSnapshotConsumer(
+            @Value("${spring.kafka.snapshot-consumer.bootstrap-servers}") String bootstrapServers,
+            @Value("${spring.kafka.snapshot-consumer.group-id}") String groupId,
+            @Value("${spring.kafka.snapshot-consumer.key-deserializer}") String keyDeserializer,
+            @Value("${spring.kafka.snapshot-consumer.value-deserializer}") String valueDeserializer,
+            @Value("${spring.kafka.snapshot-consumer.enable-auto-commit}") boolean enableAutoCommit) {
         Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "analyzer-snapshot-group");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, SensorsSnapshotDeserializer.class.getName());
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
-        return props;
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializer);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, enableAutoCommit);
+        this.consumer = new KafkaConsumer<>(props);
     }
 
     public ConsumerRecords<String, SensorsSnapshotAvro> poll(Duration timeout) {
@@ -46,6 +47,10 @@ public class KafkaSnapshotConsumer {
 
     public void subscribe(List<String> topics) {
         consumer.subscribe(topics);
+    }
+
+    public void wakeup() {
+        consumer.wakeup();
     }
 
     @PreDestroy
