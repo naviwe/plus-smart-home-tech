@@ -1,3 +1,18 @@
 spring:
   application:
     name: aggregator
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: ru.practicum.telemetry.serialization.AvroSerializer
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: aggregator-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: ru.practicum.telemetry.deserialization.SensorEventDeserializer
+      enable-auto-commit: false
+kafka:
+  topics:
+    sensors: telemetry.sensors.v1
+    snapshots: telemetry.snapshots.v1

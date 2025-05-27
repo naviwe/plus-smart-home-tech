@@ -1,8 +1,8 @@
 package ru.yandex.practicum.aggregator;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.errors.WakeupException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.aggregator.kafka.KafkaEventConsumer;
 import ru.yandex.practicum.aggregator.kafka.KafkaEventProducer;
@@ -13,16 +13,35 @@ import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class AggregationStarter {
 
     private final KafkaEventConsumer consumer;
     private final KafkaEventProducer producer;
     private final SensorSnapshotService snapshotService;
+    private final String sensorsTopic;
+    private final String snapshotsTopic;
+
+    public AggregationStarter(
+            KafkaEventConsumer consumer,
+            KafkaEventProducer producer,
+            SensorSnapshotService snapshotService,
+            @Value("${kafka.topics.sensors}") String sensorsTopic,
+            @Value("${kafka.topics.snapshots}") String snapshotsTopic) {
+        this.consumer = consumer;
+        this.producer = producer;
+        this.snapshotService = snapshotService;
+        this.sensorsTopic = sensorsTopic;
+        this.snapshotsTopic = snapshotsTopic;
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            log.info("Shutdown hook triggered, waking up consumer...");
+            consumer.wakeup();
+        }));
+    }
 
     public void start() {
-        log.info("Initializing subscription to topic telemetry.sensors.v1");
-        consumer.subscribe(List.of("telemetry.sensors.v1"));
+        log.info("Initializing subscription to topic {}", sensorsTopic);
+        consumer.subscribe(List.of(sensorsTopic));
 
         try {
             while (true) {
@@ -36,7 +55,7 @@ public class AggregationStarter {
                         snapshotService.updateSnapshot(event).ifPresent(snapshot -> {
                             try {
                                 producer.send(
-                                        "telemetry.snapshots.v1",
+                                        snapshotsTopic,
                                         snapshot.getHubId(),
                                         snapshot
                                 );
