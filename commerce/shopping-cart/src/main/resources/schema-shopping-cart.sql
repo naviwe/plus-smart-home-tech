@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS shopping_cart (
     id UUID PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
     active BOOLEAN NOT NULL DEFAULT true,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS shopping_cart_item (
@@ -14,8 +14,7 @@ CREATE TABLE IF NOT EXISTS shopping_cart_item (
     cart_id UUID NOT NULL REFERENCES shopping_cart(id) ON DELETE CASCADE,
     product_id UUID NOT NULL,
     quantity BIGINT NOT NULL CHECK (quantity >= 0),
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT unique_cart_product UNIQUE (cart_id, product_id)
 );
