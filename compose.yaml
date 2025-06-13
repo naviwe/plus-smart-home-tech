@@ -40,9 +40,13 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=smart_home_db
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
+      POSTGRES_DB: smart_home_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=en_US.UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "smart_home_db", "-U", "user" ]
       timeout: 5s
