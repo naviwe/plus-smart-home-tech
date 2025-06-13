@@ -69,7 +69,7 @@
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
-            <version>3.1.0</version> <!-- или более свежую версию -->
+            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -100,7 +100,7 @@
                         <path>
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>
-                            <version>1.6.0.Beta2</version> <!-- та же версия, что и mapstruct -->
+                            <version>1.6.0.Beta2</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

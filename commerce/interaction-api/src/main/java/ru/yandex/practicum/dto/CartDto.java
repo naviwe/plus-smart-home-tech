@@ -1,6 +1,6 @@
 package ru.yandex.practicum.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +13,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class CartDto {
-    @NotBlank
+    @NotNull
     private String shoppingCartId;
 
     private Map<String, Long> products;

@@ -4,6 +4,7 @@ package ru.yandex.practicum.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,21 +20,27 @@ import ru.yandex.practicum.enums.QuantityState;
 public class ProductDto {
     @NotBlank
     private String productId;
+
     @NotBlank
     private String productName;
+
     @NotBlank
     private String description;
+
     private String imageSrc;
-    @NotBlank
+
+    @NotNull
     private QuantityState quantityState;
-    @NotBlank
+
+    @NotNull
     private ProductState productState;
-    @NotBlank
+
     @Min(value = 1, message = "Рейтинг не может быть меньше 1")
     @Max(value = 5, message = "Рейтинг не может быть больше 5")
     private int rating;
+
     private ProductCategory productCategory;
-    @NotBlank
+
     @Min(value = 1, message = "Стоимость не может быть меньше 1")
     private float price;
 }
