@@ -2,16 +2,18 @@ spring:
   application:
     name: analyzer
   datasource:
-    url: jdbc:postgresql://localhost:5432/telemetry
-    username: telemetry_user
-    password: secret
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:6541/smarthome
+    username: smarthome
+    password: smarthome
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
-    show-sql: true
     properties:
       hibernate:
         format_sql: true
+    show-sql: true
   kafka:
     hub-consumer:
       bootstrap-servers: localhost:9092
