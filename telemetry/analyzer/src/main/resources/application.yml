@@ -1,42 +1,21 @@
 spring:
   application:
     name: analyzer
-  datasource:
-    url: jdbc:postgresql://localhost:5432/telemetry
-    username: telemetry_user
-    password: secret
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-  kafka:
-    hub-consumer:
-      bootstrap-servers: localhost:9092
-      group-id: analyzer-hub-event-group
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: ru.practicum.telemetry.deserialization.HubEventDeserializer
-      enable-auto-commit: false
-    snapshot-consumer:
-      bootstrap-servers: localhost:9092
-      group-id: analyzer-snapshot-group
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: ru.practicum.telemetry.deserialization.SensorsSnapshotDeserializer
-      enable-auto-commit: false
-kafka:
-  topics:
-    hubs: telemetry.hubs.v1
-    snapshots: telemetry.snapshots.v1
-grpc:
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      fail-fast: true
+      retry:
+        use-random-policy: true
+        max-interval: 6000
+      discovery:
+        enabled: true
+        serviceId: config-server
+
+eureka:
+  instance:
+    hostname: localhost
   client:
-    hub-router:
-      address: 'static://localhost:59090'
-      enableKeepAlive: true
-      keepAliveWithoutCalls: true
-      negotiationType: plaintext
-logging:
-  level:
-    root: INFO
-    ru.yandex.practicum.telemetry.analyzer: DEBUG
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
