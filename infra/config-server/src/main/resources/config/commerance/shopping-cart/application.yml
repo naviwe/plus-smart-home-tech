@@ -9,15 +9,18 @@ spring:
   sql:
     init:
       mode: always
-      platform: postgresql
-      schema-locations: classpath:schema-shopping-cart.sql
+      schema: classpath:/schema.sql
+      data: classpath:/data.sql
   datasource:
-    url: jdbc:postgresql://localhost:5432/smart_home_db
+    url: jdbc:postgresql://localhost:5432/smart_home_db?currentSchema=shopping_cart
     username: user
     password: password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 1
   jpa:
     hibernate:
       ddl-auto: none
     properties:
       hibernate:
-        default_schema: shopping_cart
+        format_sql: true
