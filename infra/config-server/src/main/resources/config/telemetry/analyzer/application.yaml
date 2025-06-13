@@ -1,19 +1,20 @@
 spring:
-  application:
-    name: analyzer
+  sql:
+    init:
+      mode: always
   datasource:
+    url: jdbc:postgresql://localhost:5432/smart_home
+    username: user
+    password: password
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:6541/smarthome
-    username: smarthome
-    password: smarthome
+    hikari:
+      maximum-pool-size: 10
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: true
-    show-sql: true
   kafka:
     hub-consumer:
       bootstrap-servers: localhost:9092

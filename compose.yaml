@@ -1,15 +1,15 @@
 services:
-  smart-home-db:
+  smart_home_db:
     image: postgres:16.1
-    container_name: postgres-smarthome
+    container_name: smart_home_db
     ports:
-      - "6541:5432"
+      - "5432:5432"
     environment:
-      POSTGRES_DB: smarthome
-      POSTGRES_USER: smarthome
-      POSTGRES_PASSWORD: smarthome
+      - POSTGRES_DB=smart_home_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
     healthcheck:
-      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      test: [ "CMD", "pg_isready", "-q", "-d", "smart_home_db", "-U", "user" ]
       timeout: 5s
       interval: 5s
       retries: 10
