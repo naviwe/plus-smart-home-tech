@@ -13,8 +13,8 @@ spring:
       data: classpath:/data.sql
   datasource:
     url: jdbc:postgresql://localhost:5432/smart_home_db?currentSchema=shopping_cart
-    username: telemetry_user
-    password: secret
+    username: user
+    password: password
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 1
