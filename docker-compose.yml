@@ -19,13 +19,13 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  postgres:
-    image: postgres:16
-    container_name: smart-home-postgres
-    environment:
-      POSTGRES_DB: telemetry
-      POSTGRES_USER: telemetry_user
-      POSTGRES_PASSWORD: secret
+  smart_home_db:
+    image: postgres:16.1
+    container_name: smart_home_db
     ports:
       - "5432:5432"
+    environment:
+      - POSTGRES_DB=smart_home_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
     restart: unless-stopped

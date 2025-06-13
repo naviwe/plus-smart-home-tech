@@ -2,9 +2,10 @@ spring:
   application:
     name: analyzer
   datasource:
-    url: jdbc:postgresql://localhost:5432/telemetry
-    username: telemetry_user
-    password: secret
+    url: jdbc:postgresql://localhost:5432/smart_home
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
