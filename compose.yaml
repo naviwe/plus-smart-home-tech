@@ -1,14 +1,27 @@
-version: '3.8'
-
 services:
+  smart-home-db:
+    image: postgres:16.1
+    container_name: postgres-smarthome
+    ports:
+      - "6541:5432"
+    environment:
+      POSTGRES_DB: smarthome
+      POSTGRES_USER: smarthome
+      POSTGRES_PASSWORD: smarthome
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
 
   kafka:
     image: confluentinc/confluent-local:7.4.3
     hostname: kafka
     container_name: kafka
     ports:
-      - "9092:9092"
-      - "9101:9101"
+      - "9092:9092" # for client connections
+      - "9101:9101" # JMX
+    restart: unless-stopped
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
@@ -18,102 +31,19 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
       KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
       CLUSTER_ID: 'K0EA9p0yEe6MkAAAAkKsEg'
-
   kafka-init-topics:
     image: confluentinc/confluent-local:7.4.3
     container_name: kafka-init-topics
     depends_on:
       - kafka
-    command: "bash -c '...'"
+    command: "bash -c \
+                'kafka-topics --create --topic telemetry.sensors.v1 \
+                             --partitions 1 --replication-factor 1 --if-not-exists \
+                             --bootstrap-server kafka:29092 && \
+                kafka-topics --create --topic telemetry.snapshots.v1 \
+                             --partitions 1 --replication-factor 1 --if-not-exists \
+                             --bootstrap-server kafka:29092 && \
+                kafka-topics --create --topic telemetry.hubs.v1 \
+                             --partitions 1 --replication-factor 1 --if-not-exists \
+                             --bootstrap-server kafka:29092'"
     init: true
-
-  smart_home_db:
-    image: postgres:16.1
-    container_name: smart_home_db
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_DB=smart_home_db
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-q", "-d", "smart_home_db", "-U", "user" ]
-      timeout: 5s
-      interval: 5s
-      retries: 10
-
-
-  discovery-server:
-    image: openjdk:17-jdk-slim
-    container_name: discovery-server
-    ports:
-      - "8761:8761"
-    volumes:
-      - ./discovery-server/build/libs/discovery-server.jar:/app.jar
-    command: java -jar /app.jar
-    depends_on:
-      - smart_home_db
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-
-  config-server:
-    image: openjdk:17-jdk-slim
-    container_name: config-server
-    ports:
-      - "8888:8888"
-    volumes:
-      - ./config-server/build/libs/config-server.jar:/app.jar
-    environment:
-      - SPRING_PROFILES_ACTIVE=native
-    command: java -jar /app.jar
-    depends_on:
-      - discovery-server
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-
-  shopping-cart:
-    image: openjdk:17-jdk-slim
-    container_name: shopping-cart
-    ports:
-      - "8081:8081"
-      - "9091:9091"
-    volumes:
-      - ./shopping-cart/build/libs/shopping-cart.jar:/app.jar
-    environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-    command: java -jar /app.jar
-    depends_on:
-      - config-server
-      - discovery-server
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
-  shopping-store:
-
-    ports:
-      - "8082:8082"
-      - "9092:9092"
-    environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
-
-  warehouse:
-
-    ports:
-      - "8083:8083"
-      - "9093:9093"
-    environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
