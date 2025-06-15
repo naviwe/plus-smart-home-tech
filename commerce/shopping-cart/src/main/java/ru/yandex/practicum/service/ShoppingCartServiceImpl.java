@@ -75,10 +75,17 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 .map(UUID::toString)
                 .collect(Collectors.toList());
 
-        productIdsAsStrings.forEach(cart.getProducts()::remove);
+        Map<String, Long> products = cart.getProducts();
+        productIdsAsStrings.forEach(products::remove);
 
         ShoppingCart savedCart = cartRepository.save(cart);
-        return cartMapper.toShoppingCartDto(savedCart);
+        CartDto cartDto = cartMapper.toShoppingCartDto(savedCart);
+
+        if (cartDto.getShoppingCartId() == null) {
+            cartDto.setShoppingCartId(savedCart.getShoppingCartId());
+        }
+
+        return cartDto;
     }
 
     @Transactional

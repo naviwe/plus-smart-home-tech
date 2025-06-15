@@ -11,7 +11,10 @@ import ru.yandex.practicum.dto.shoppingcart.RemoveProductsRequest;
 import ru.yandex.practicum.service.ShoppingCartService;
 import ru.yandex.practicum.dto.shoppingcart.CartDto;
 import ru.yandex.practicum.dto.warehouse.ReserveProductsDto;
+
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @Validated
@@ -48,10 +51,9 @@ public class ShoppingCartController {
     @PostMapping("/remove")
     public CartDto removeFromShoppingCart(
             @RequestParam String username,
-            @Valid @RequestBody RemoveProductsRequest request) {
-
-        log.info("Запрос на удаление товаров {} из корзины пользователя {}", request.getProductIds(), username);
-        return cartService.removeProductsFromCart(username, request.getProductIds());
+            @Valid @RequestBody List<UUID> productIds) {
+        log.info("Запрос на удаление товаров {} из корзины пользователя {}", productIds, username);
+        return cartService.removeProductsFromCart(username, productIds);
     }
 
     @ResponseStatus(HttpStatus.OK)
