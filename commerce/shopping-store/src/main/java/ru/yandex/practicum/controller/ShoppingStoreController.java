@@ -1,6 +1,8 @@
 package ru.yandex.practicum.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,9 +24,10 @@ import java.util.List;
 public class ShoppingStoreController {
     private final ShoppingStoreService storeService;
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<ProductDto> getProductsByCategory(@RequestParam ProductCategory category, Pageable pageable) {
+    public List<ProductDto> getProductsByCategory(
+            @RequestParam @NotNull ProductCategory category,
+            @Valid Pageable pageable) {
         log.info("Запрос на получения списка товаров по категории {} и страницам {}", category, pageable);
         return storeService.getProductsByCategory(category, pageable);
     }
@@ -43,14 +46,12 @@ public class ShoppingStoreController {
         return storeService.updateProduct(productDto);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @PostMapping("/removeProductFromStore")
-    public boolean removeProduct(@RequestParam String productId) {
+    public boolean removeProduct(@RequestBody @NotBlank String productId) {
         log.info("Запрос на удаление товара {}", productId);
         return storeService.removeProduct(productId);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @PostMapping("/quantityState")
     public boolean changeState(@RequestBody @Valid SetProductCountState request) {
         log.info("Запрос на установку статуса для товара {}", request);
