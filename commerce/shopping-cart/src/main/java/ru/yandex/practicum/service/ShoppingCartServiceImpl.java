@@ -59,13 +59,18 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Transactional
     @Override
-    public CartDto changeCart(String username, Map<String, Long> items) {
+    public CartDto changeCart(String username, Map<String, Long> itemsToRemove) {
         checkUserPresence(username);
-        ShoppingCart shoppingCart = getCart(username);
-        if (shoppingCart == null)
-            throw new ConditionsNotMetException("Отсутствует корзина у пользователя " + username);
-        shoppingCart.setProducts(items);
-        return cartMapper.toShoppingCartDto(cartRepository.save(shoppingCart));
+
+        ShoppingCart cart = getCart(username);
+        if (cart == null) {
+            throw new ConditionsNotMetException("Корзина пользователя " + username + " не найдена");
+        }
+
+        itemsToRemove.keySet().forEach(cart.getProducts()::remove);
+
+        ShoppingCart savedCart = cartRepository.save(cart);
+        return cartMapper.toShoppingCartDto(savedCart);
     }
 
     @Transactional

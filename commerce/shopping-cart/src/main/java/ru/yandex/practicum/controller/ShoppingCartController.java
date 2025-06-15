@@ -45,9 +45,9 @@ public class ShoppingCartController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/remove")
     public CartDto changeCart(@RequestParam String username,
-                              @RequestBody Map<String, Long> items) {
-        log.info("Запрос на изменение состава товаров {} в корзине пользователя {}",  items, username);
-        return cartService.changeCart(username, items);
+                              @RequestBody Map<String, Long> itemsToRemove) {
+        log.info("Удаление товаров {} из корзины пользователя {}", itemsToRemove, username);
+        return cartService.changeCart(username, itemsToRemove);
     }
 
     @ResponseStatus(HttpStatus.OK)

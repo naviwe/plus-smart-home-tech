@@ -16,10 +16,5 @@ public class CartDto {
     @NotNull
     private String shoppingCartId;
 
-    @NotNull
-    private String username;
-
-    private boolean cartState;
-
     private Map<String, Long> products;
 }
