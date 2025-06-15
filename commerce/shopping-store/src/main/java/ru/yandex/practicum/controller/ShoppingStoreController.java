@@ -42,9 +42,12 @@ public class ShoppingStoreController {
         return storeService.updateProduct(productDto);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @PostMapping("/removeProductFromStore")
-    public boolean removeProduct(@RequestParam String productId) {
+    public boolean removeProduct(@RequestParam(required = false) String productId) {
+        if (productId == null || productId.isEmpty()) {
+            log.warn("Параметр productId отсутствует");
+            return false;
+        }
         log.info("Запрос на удаление товара {}", productId);
         return storeService.removeProduct(productId);
     }

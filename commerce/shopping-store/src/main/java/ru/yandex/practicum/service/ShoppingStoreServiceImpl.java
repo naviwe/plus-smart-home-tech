@@ -30,10 +30,12 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
 
     @Override
     public List<ProductDto> getProductsByCategory(ProductCategory category, ru.yandex.practicum.dto.Pageable pageable) {
-        Pageable pageRequest = PageRequest.of(pageable.getPage(), pageable.getSize(),
-                Sort.by(Sort.DEFAULT_DIRECTION, String.join(",", pageable.getSort())));
-        List<Product> products = storeRepository.findAllByProductCategory(category, pageRequest);
+        Sort sort = pageable.getSort().isEmpty()
+                ? Sort.unsorted()
+                : Sort.by(Sort.Direction.ASC, pageable.getSort().toArray(new String[0]));
 
+        Pageable pageRequest = PageRequest.of(pageable.getPage(), pageable.getSize(), sort);
+        List<Product> products = storeRepository.findAllByProductCategory(category, pageRequest);
         return productMapper.mapListProducts(products);
     }
 
