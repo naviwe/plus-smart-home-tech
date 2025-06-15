@@ -18,6 +18,7 @@ import ru.yandex.practicum.enums.QuantityState;
 @AllArgsConstructor
 @Builder
 public class ProductDto {
+    @NotBlank
     private String productId;
 
     @NotBlank
@@ -28,18 +29,20 @@ public class ProductDto {
 
     private String imageSrc;
 
-    @NotNull
+    @NotBlank
     private QuantityState quantityState;
 
     @NotNull
     private ProductState productState;
 
+    @NotBlank
     @Min(value = 1, message = "Рейтинг не может быть меньше 1")
     @Max(value = 5, message = "Рейтинг не может быть больше 5")
     private int rating;
 
     private ProductCategory productCategory;
 
+    @NotBlank
     @Min(value = 1, message = "Стоимость не может быть меньше 1")
     private float price;
 }

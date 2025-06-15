@@ -17,7 +17,6 @@ import ru.yandex.practicum.mapper.ProductMapper;
 import ru.yandex.practicum.model.Product;
 import ru.yandex.practicum.repository.ShoppingStoreRepository;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,21 +30,9 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
 
     @Override
     public List<ProductDto> getProductsByCategory(ProductCategory category, ru.yandex.practicum.dto.Pageable pageable) {
-        if (pageable.getSize() < 1) {
-            throw new IllegalArgumentException("Размер страницы должен быть не менее 1");
-        }
-
-        Sort sort = pageable.getSort().isEmpty()
-                ? Sort.unsorted()
-                : Sort.by(Sort.Direction.ASC, pageable.getSort().toArray(new String[0]));
-
-        Pageable pageRequest = PageRequest.of(pageable.getPage(), pageable.getSize(), sort);
+        Pageable pageRequest = PageRequest.of(pageable.getPage(), pageable.getSize(),
+                Sort.by(Sort.DEFAULT_DIRECTION, String.join(",", pageable.getSort())));
         List<Product> products = storeRepository.findAllByProductCategory(category, pageRequest);
-
-        if (products.isEmpty()) {
-            log.warn("Не найдены товары для категории {}", category);
-            return Collections.emptyList();
-        }
 
         return productMapper.mapListProducts(products);
     }
@@ -75,7 +62,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
         Product product = getProduct(productId);
         product.setProductState(ProductState.DEACTIVATE);
         storeRepository.save(product);
-        log.info("Товар {} переведен в статус DEACTIVATE", productId);
+
         return true;
     }
 

@@ -24,7 +24,7 @@ public class ShoppingStoreController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<ProductDto> getProductsByCategory(@RequestParam ProductCategory category, @Valid Pageable pageable) {
+    public List<ProductDto> getProductsByCategory(@RequestParam ProductCategory category, Pageable pageable) {
         log.info("Запрос на получения списка товаров по категории {} и страницам {}", category, pageable);
         return storeService.getProductsByCategory(category, pageable);
     }
@@ -46,10 +46,6 @@ public class ShoppingStoreController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/removeProductFromStore")
     public boolean removeProduct(@RequestParam String productId) {
-        if (productId == null || productId.isEmpty()) {
-            log.warn("Параметр productId отсутствует");
-            throw new IllegalArgumentException("Параметр productId обязателен");
-        }
         log.info("Запрос на удаление товара {}", productId);
         return storeService.removeProduct(productId);
     }
