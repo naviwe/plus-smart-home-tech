@@ -4,16 +4,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.dto.ChangeProductCount;
-import ru.yandex.practicum.dto.ReserveProductsDto;
-import ru.yandex.practicum.dto.CartDto;
+import ru.yandex.practicum.dto.shoppingcart.ChangeProductQuantityRequest;
+import ru.yandex.practicum.dto.warehouse.ReserveProductsDto;
+import ru.yandex.practicum.dto.shoppingcart.CartDto;
 import ru.yandex.practicum.exception.ConditionsNotMetException;
 import ru.yandex.practicum.WarehouseClient;
+import ru.yandex.practicum.exception.NoProductsInShoppingCartException;
 import ru.yandex.practicum.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.model.ShoppingCart;
 import ru.yandex.practicum.repository.ShoppingCartRepository;
 
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -59,15 +63,19 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Transactional
     @Override
-    public CartDto changeCart(String username, Map<String, Long> itemsToRemove) {
+    public CartDto removeProductsFromCart(String username, List<UUID> productIds) {
         checkUserPresence(username);
-
         ShoppingCart cart = getCart(username);
-        if (cart == null) {
-            throw new ConditionsNotMetException("Корзина пользователя " + username + " не найдена");
+
+        if (cart == null || cart.getProducts().isEmpty()) {
+            throw new NoProductsInShoppingCartException("Корзина пуста или не найдена");
         }
 
-        itemsToRemove.keySet().forEach(cart.getProducts()::remove);
+        List<String> productIdsAsStrings = productIds.stream()
+                .map(UUID::toString)
+                .collect(Collectors.toList());
+
+        productIdsAsStrings.forEach(cart.getProducts()::remove);
 
         ShoppingCart savedCart = cartRepository.save(cart);
         return cartMapper.toShoppingCartDto(savedCart);
@@ -75,13 +83,22 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Transactional
     @Override
-    public CartDto changeCountProductInCart(String username, ChangeProductCount request) {
+    public CartDto changeCountProductInCart(String username, ChangeProductQuantityRequest request) {
         checkUserPresence(username);
-        ShoppingCart shoppingCart = getCart(username);
-        if (shoppingCart == null || !shoppingCart.getProducts().containsKey(request.getProductId()))
-            throw new ConditionsNotMetException("Отсутствует корзина у пользователя " + username);
-        shoppingCart.getProducts().put(request.getProductId(), request.getNewQuantity());
-        return cartMapper.toShoppingCartDto(cartRepository.save(shoppingCart));
+        ShoppingCart cart = getCart(username);
+
+        if (cart == null) {
+            throw new ConditionsNotMetException("Корзина не найдена");
+        }
+
+        String productIdStr = request.getProductId().toString();
+        if (!cart.getProducts().containsKey(productIdStr)) {
+            throw new NoProductsInShoppingCartException("Товар не найден в корзине");
+        }
+
+        cart.getProducts().put(productIdStr, request.getNewQuantity());
+        ShoppingCart savedCart = cartRepository.save(cart);
+        return cartMapper.toShoppingCartDto(savedCart);
     }
 
     @Override

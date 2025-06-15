@@ -1,4 +1,4 @@
-package ru.yandex.practicum.dto;
+package ru.yandex.practicum.dto.warehouse;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -6,15 +6,22 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.yandex.practicum.dto.SizeDto;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AddProductInWarehouse {
+public class NewProductInWarehouse {
+    @NotBlank
     private String productId;
 
+    private boolean fragile;
+
     @NotBlank
-    @Min(value = 1, message = "Количество не может быть меньше 1")
-    private int quantity;
+    private SizeDto dimension;
+
+    @NotBlank
+    @Min(value = 1, message = "weight should not be less than 1")
+    private double weight;
 }

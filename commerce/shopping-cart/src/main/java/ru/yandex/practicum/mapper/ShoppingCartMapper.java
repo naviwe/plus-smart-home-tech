@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import ru.yandex.practicum.model.ShoppingCart;
-import ru.yandex.practicum.dto.CartDto;
+import ru.yandex.practicum.dto.shoppingcart.CartDto;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ShoppingCartMapper {

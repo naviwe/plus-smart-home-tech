@@ -1,14 +1,16 @@
 package ru.yandex.practicum.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.dto.shoppingcart.ChangeProductQuantityRequest;
+import ru.yandex.practicum.dto.shoppingcart.RemoveProductsRequest;
 import ru.yandex.practicum.service.ShoppingCartService;
-import ru.yandex.practicum.dto.CartDto;
-import ru.yandex.practicum.dto.ChangeProductCount;
-import ru.yandex.practicum.dto.ReserveProductsDto;
+import ru.yandex.practicum.dto.shoppingcart.CartDto;
+import ru.yandex.practicum.dto.warehouse.ReserveProductsDto;
 import java.util.Map;
 
 @RestController
@@ -44,16 +46,18 @@ public class ShoppingCartController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/remove")
-    public CartDto changeCart(@RequestParam String username,
-                              @RequestBody Map<String, Long> itemsToRemove) {
-        log.info("Удаление товаров {} из корзины пользователя {}", itemsToRemove, username);
-        return cartService.changeCart(username, itemsToRemove);
+    public CartDto removeFromShoppingCart(
+            @RequestParam String username,
+            @Valid @RequestBody RemoveProductsRequest request) {
+
+        log.info("Запрос на удаление товаров {} из корзины пользователя {}", request.getProductIds(), username);
+        return cartService.removeProductsFromCart(username, request.getProductIds());
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/change-quantity")
     public CartDto changeCountProductsOfCart(@RequestParam String username,
-                                             @RequestBody ChangeProductCount request) {
+                                             @RequestBody ChangeProductQuantityRequest request) {
         log.info("Запрос на изменение количества товаров {} в корзине пользователя {}", request, username);
         return cartService.changeCountProductInCart(username, request);
     }

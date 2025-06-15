@@ -5,7 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.dto.*;
+import ru.yandex.practicum.dto.shoppingcart.CartDto;
+import ru.yandex.practicum.dto.warehouse.AddProductInWarehouse;
+import ru.yandex.practicum.dto.warehouse.AddressWarehouseDto;
+import ru.yandex.practicum.dto.warehouse.NewProductInWarehouse;
+import ru.yandex.practicum.dto.warehouse.ReserveProductsDto;
 import ru.yandex.practicum.service.WarehouseService;
 
 @RestController
