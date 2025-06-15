@@ -1,5 +1,6 @@
 package ru.yandex.practicum.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class ShoppingStoreController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<ProductDto> getProductsByCategory(@RequestParam ProductCategory category, Pageable pageable) {
+    public List<ProductDto> getProductsByCategory(@RequestParam ProductCategory category, @Valid Pageable pageable) {
         log.info("Запрос на получения списка товаров по категории {} и страницам {}", category, pageable);
         return storeService.getProductsByCategory(category, pageable);
     }
@@ -46,7 +47,7 @@ public class ShoppingStoreController {
     public boolean removeProduct(@RequestParam(required = false) String productId) {
         if (productId == null || productId.isEmpty()) {
             log.warn("Параметр productId отсутствует");
-            return false;
+            throw new IllegalArgumentException("Параметр productId обязателен");
         }
         log.info("Запрос на удаление товара {}", productId);
         return storeService.removeProduct(productId);
