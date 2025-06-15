@@ -5,6 +5,10 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: trace
     org.springframework.jdbc.datasource.init: DEBUG
 
+grpc:
+  server:
+    port: 9091
+
 spring:
   sql:
     init:
