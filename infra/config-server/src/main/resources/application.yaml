@@ -1,3 +1,6 @@
+server:
+  port: 0
+
 spring:
   application:
     name: config-server
@@ -9,13 +12,12 @@ spring:
         native:
           searchLocations:
             - classpath:config/telemetry/{application}
+            - classpath:config/commerce/{application}
 
-  server:
-    port: 0
-
-  eureka:
-    instance:
-      hostname: localhost
-    client:
-      serviceUrl:
-        defaultZone: http://localhost:8761/eureka/
+eureka:
+  instance:
+    preferIpAddress: true
+    instanceId: ${spring.application.name}:${random.value}
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
