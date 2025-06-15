@@ -43,8 +43,9 @@ public class ShoppingStoreController {
         return storeService.updateProduct(productDto);
     }
 
+    @ResponseStatus(HttpStatus.OK)
     @PostMapping("/removeProductFromStore")
-    public boolean removeProduct(@RequestParam(required = false) String productId) {
+    public boolean removeProduct(@RequestParam String productId) {
         if (productId == null || productId.isEmpty()) {
             log.warn("Параметр productId отсутствует");
             throw new IllegalArgumentException("Параметр productId обязателен");
