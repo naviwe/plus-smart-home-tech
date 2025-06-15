@@ -1,24 +1,24 @@
 server:
-  port: 0
+  port: 0  # Случайный HTTP-порт
 
-eureka:
-  instance:
-    hostname: localhost
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+grpc:
+  server:
+    port: 9091  # Явное указание порта gRPC
 
 spring:
   application:
     name: shopping-cart
   config:
-    import: "configserver:"
+    import: "configserver:http://localhost:8888"
   cloud:
     config:
       fail-fast: true
       retry:
-        use-random-policy: true
         max-interval: 6000
-      discovery:
-        enabled: true
-        service-id: config-server
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    preferIpAddress: true
