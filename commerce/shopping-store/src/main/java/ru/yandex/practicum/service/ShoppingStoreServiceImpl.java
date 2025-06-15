@@ -40,9 +40,9 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     @Transactional
     @Override
     public ProductDto createProduct(ProductDto productDto) {
-        if (storeRepository.getByProductId(productDto.getProductId()).isPresent())
-            throw new ConditionsNotMetException("Создаваемый товар уже есть в базе данных");
         Product product = productMapper.productDtoToProduct(productDto);
+        product.setProductId(null);
+        product.setProductState(ProductState.ACTIVE);
 
         return productMapper.productToProductDto(storeRepository.save(product));
     }
