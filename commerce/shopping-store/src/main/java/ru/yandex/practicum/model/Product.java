@@ -2,6 +2,7 @@ package ru.yandex.practicum.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 import ru.yandex.practicum.enums.ProductCategory;
 import ru.yandex.practicum.enums.ProductState;
 import ru.yandex.practicum.enums.QuantityState;
@@ -16,6 +17,8 @@ import ru.yandex.practicum.enums.QuantityState;
 public class Product {
     @Id
     @Column(name = "product_id", nullable = false)
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String productId;
 
     @Column(name = "product_name", nullable = false)

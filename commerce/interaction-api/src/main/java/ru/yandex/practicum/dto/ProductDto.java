@@ -18,7 +18,6 @@ import ru.yandex.practicum.enums.QuantityState;
 @AllArgsConstructor
 @Builder
 public class ProductDto {
-    @NotBlank
     private String productId;
 
     @NotBlank
