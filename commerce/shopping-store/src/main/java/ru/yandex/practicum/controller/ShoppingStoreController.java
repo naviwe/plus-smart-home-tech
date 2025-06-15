@@ -11,6 +11,8 @@ import ru.yandex.practicum.dto.SetProductCountState;
 import ru.yandex.practicum.enums.ProductCategory;
 import ru.yandex.practicum.service.ShoppingStoreService;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 
 @RestController
@@ -24,36 +26,43 @@ public class ShoppingStoreController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<ProductDto> getProductsByCategory(@RequestParam ProductCategory category, Pageable pageable) {
-        log.info("Запрос на получения списка товаров по категории {} и страницам {}", category, pageable);
+        log.info("Запрос на получение списка товаров по категории {} и страницам {}", category, pageable);
         return storeService.getProductsByCategory(category, pageable);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @PutMapping
-    public ProductDto createProduct(@RequestBody ProductDto productDto) {
+    @GetMapping("/all")
+    public List<ProductDto> getAllProducts(Pageable pageable) {
+        log.info("Запрос на получение всех товаров с пагинацией {}", pageable);
+        return storeService.getAllProducts(pageable);
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping
+    public ProductDto createProduct(@Valid @RequestBody ProductDto productDto) {
         log.info("Запрос на создание нового товара {}", productDto);
         return storeService.createProduct(productDto);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @PostMapping
-    public ProductDto updateProduct(@RequestBody ProductDto productDto) {
+    @PutMapping
+    public ProductDto updateProduct(@Valid @RequestBody ProductDto productDto) {
         log.info("Запрос на обновление товара {}", productDto);
         return storeService.updateProduct(productDto);
     }
 
-    @ResponseStatus(HttpStatus.OK)
-    @PostMapping("/removeProductFromStore")
-    public boolean removeProduct(@RequestParam String productId) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/removeProductFromStore")
+    public void removeProduct(@RequestParam @NotBlank String productId) {
         log.info("Запрос на удаление товара {}", productId);
-        return storeService.removeProduct(productId);
+        storeService.removeProduct(productId);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/quantityState")
-    public boolean changeState(SetProductCountState request) {
+    public void changeState(@Valid @RequestBody SetProductCountState request) {
         log.info("Запрос на установку статуса для товара {}", request);
-        return storeService.changeState(request);
+        storeService.changeState(request);
     }
 
     @ResponseStatus(HttpStatus.OK)

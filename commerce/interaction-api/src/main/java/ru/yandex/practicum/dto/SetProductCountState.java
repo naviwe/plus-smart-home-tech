@@ -1,6 +1,7 @@
 package ru.yandex.practicum.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +16,6 @@ public class SetProductCountState {
     @NotBlank
     private String productId;
 
-    @NotBlank
+    @NotNull
     private QuantityState quantityState;
 }

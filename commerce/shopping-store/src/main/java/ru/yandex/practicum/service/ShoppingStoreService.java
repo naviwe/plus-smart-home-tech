@@ -14,9 +14,11 @@ public interface ShoppingStoreService {
 
     ProductDto updateProduct(ProductDto productDto);
 
-    boolean removeProduct(String productId);
+    void removeProduct(String productId);
 
-    boolean changeState(SetProductCountState request);
+    void changeState(SetProductCountState request);
+
+    List<ProductDto> getAllProducts(Pageable pageable);
 
     ProductDto getInfoByProduct(String productId);
 }
