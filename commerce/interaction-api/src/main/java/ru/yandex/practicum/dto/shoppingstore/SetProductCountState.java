@@ -1,4 +1,4 @@
-package ru.yandex.practicum.dto;
+package ru.yandex.practicum.dto.shoppingstore;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,9 +13,9 @@ import ru.yandex.practicum.enums.QuantityState;
 @AllArgsConstructor
 @Builder
 public class SetProductCountState {
-    @NotBlank
+    @NotBlank(message = "Product ID cannot be blank")
     private String productId;
 
-    @NotNull
+    @NotNull(message = "Quantity state cannot be null")
     private QuantityState quantityState;
 }

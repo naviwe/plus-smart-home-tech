@@ -4,16 +4,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.dto.ChangeProductCount;
-import ru.yandex.practicum.dto.ReserveProductsDto;
-import ru.yandex.practicum.dto.CartDto;
+import ru.yandex.practicum.dto.shoppingcart.ChangeProductQuantityRequest;
+import ru.yandex.practicum.dto.warehouse.ReserveProductsDto;
+import ru.yandex.practicum.dto.shoppingcart.CartDto;
 import ru.yandex.practicum.exception.ConditionsNotMetException;
 import ru.yandex.practicum.WarehouseClient;
+import ru.yandex.practicum.exception.NoProductsInShoppingCartException;
 import ru.yandex.practicum.mapper.ShoppingCartMapper;
 import ru.yandex.practicum.model.ShoppingCart;
 import ru.yandex.practicum.repository.ShoppingCartRepository;
 
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -59,24 +63,49 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Transactional
     @Override
-    public CartDto changeCart(String username, Map<String, Long> items) {
+    public CartDto removeProductsFromCart(String username, List<UUID> productIds) {
         checkUserPresence(username);
-        ShoppingCart shoppingCart = getCart(username);
-        if (shoppingCart == null)
-            throw new ConditionsNotMetException("Отсутствует корзина у пользователя " + username);
-        shoppingCart.setProducts(items);
-        return cartMapper.toShoppingCartDto(cartRepository.save(shoppingCart));
+        ShoppingCart cart = getCart(username);
+
+        if (cart == null || cart.getProducts().isEmpty()) {
+            throw new NoProductsInShoppingCartException("The shopping cart is empty or not found");
+        }
+
+        List<String> productIdsAsStrings = productIds.stream()
+                .map(UUID::toString)
+                .collect(Collectors.toList());
+
+        Map<String, Long> products = cart.getProducts();
+        productIdsAsStrings.forEach(products::remove);
+
+        ShoppingCart savedCart = cartRepository.save(cart);
+        CartDto cartDto = cartMapper.toShoppingCartDto(savedCart);
+
+        if (cartDto.getShoppingCartId() == null) {
+            cartDto.setShoppingCartId(savedCart.getShoppingCartId());
+        }
+
+        return cartDto;
     }
 
     @Transactional
     @Override
-    public CartDto changeCountProductInCart(String username, ChangeProductCount request) {
+    public CartDto changeCountProductInCart(String username, ChangeProductQuantityRequest request) {
         checkUserPresence(username);
-        ShoppingCart shoppingCart = getCart(username);
-        if (shoppingCart == null || !shoppingCart.getProducts().containsKey(request.getProductId()))
-            throw new ConditionsNotMetException("Отсутствует корзина у пользователя " + username);
-        shoppingCart.getProducts().put(request.getProductId(), request.getNewQuantity());
-        return cartMapper.toShoppingCartDto(cartRepository.save(shoppingCart));
+        ShoppingCart cart = getCart(username);
+
+        if (cart == null) {
+            throw new ConditionsNotMetException("Shopping cart not found");
+        }
+
+        String productIdStr = request.getProductId().toString();
+        if (!cart.getProducts().containsKey(productIdStr)) {
+            throw new NoProductsInShoppingCartException("Product not found in the shopping cart");
+        }
+
+        cart.getProducts().put(productIdStr, request.getNewQuantity());
+        ShoppingCart savedCart = cartRepository.save(cart);
+        return cartMapper.toShoppingCartDto(savedCart);
     }
 
     @Override
@@ -87,8 +116,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     private void checkUserPresence(String username) {
-        if (username == null || username.isEmpty())
-            throw new ConditionsNotMetException("Отсутствует пользователь");
+        if (username == null || username.isEmpty()) {
+            throw new ConditionsNotMetException("User is missing");
+        }
     }
 
     private ShoppingCart getCart(String username) {

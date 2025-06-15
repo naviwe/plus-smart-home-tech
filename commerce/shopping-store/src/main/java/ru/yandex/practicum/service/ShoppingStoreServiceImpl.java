@@ -2,13 +2,14 @@ package ru.yandex.practicum.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.dto.ProductDto;
-import ru.yandex.practicum.dto.SetProductCountState;
+import ru.yandex.practicum.dto.shoppingstore.ProductDto;
+import ru.yandex.practicum.dto.shoppingstore.SetProductCountState;
 import ru.yandex.practicum.exception.ConditionsNotMetException;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.enums.ProductCategory;
@@ -17,8 +18,7 @@ import ru.yandex.practicum.mapper.ProductMapper;
 import ru.yandex.practicum.model.Product;
 import ru.yandex.practicum.repository.ShoppingStoreRepository;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -29,14 +29,25 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     private final ProductMapper productMapper;
 
     @Override
-    public List<ProductDto> getProductsByCategory(ProductCategory category, ru.yandex.practicum.dto.Pageable pageable) {
-        Sort sort = pageable.getSort().isEmpty()
-                ? Sort.unsorted()
-                : Sort.by(Sort.Direction.ASC, pageable.getSort().toArray(new String[0]));
+    public Page<ProductDto> getProductsByCategory(ProductCategory category, ru.yandex.practicum.dto.shoppingstore.Pageable pageable) {
+        try {
+            String sortFields = pageable.getSort() == null || pageable.getSort().isEmpty()
+                    ? "productName"
+                    : String.join(",", pageable.getSort());
 
-        Pageable pageRequest = PageRequest.of(pageable.getPage(), pageable.getSize(), sort);
-        List<Product> products = storeRepository.findAllByProductCategory(category, pageRequest);
-        return productMapper.mapListProducts(products);
+            Pageable pageRequest = PageRequest.of(
+                    pageable.getPage(),
+                    pageable.getSize(),
+                    Sort.by(Sort.Direction.ASC, sortFields.split(",")));
+
+            Page<Product> productPage = storeRepository.findAllByProductCategory(category, pageRequest);
+
+            return productPage.map(productMapper::productToProductDto);
+
+        } catch (Exception e) {
+            log.error("Ошибка при получении продуктов по категории {}: {}", category, e.getMessage());
+            return Page.empty();
+        }
     }
 
     @Transactional
@@ -62,19 +73,28 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     @Override
     public boolean removeProduct(String productId) {
         Product product = getProduct(productId);
-        product.setProductState(ProductState.DEACTIVATE);
-        storeRepository.save(product);
 
-        return true;
+        if (product.getProductState() == ProductState.DEACTIVATE) {
+            return true;
+        }
+
+        product.setProductState(ProductState.DEACTIVATE);
+        Product savedProduct = storeRepository.save(product);
+
+        log.info("Товар {} переведен в статус DEACTIVATE: {}",
+                productId, savedProduct.getProductState());
+
+        return savedProduct.getProductState() == ProductState.DEACTIVATE;
     }
 
     @Transactional
     @Override
     public boolean changeState(SetProductCountState request) {
         Product product = getProduct(request.getProductId());
+        log.info("Установка quantityState {} для товара с ID {}", request.getQuantityState(), request.getProductId());
         product.setQuantityState(request.getQuantityState());
-        storeRepository.save(product);
-
+        Product savedProduct = storeRepository.save(product);
+        log.info("Товар с ID {} сохранен с quantityState {}", request.getProductId(), savedProduct.getQuantityState());
         return true;
     }
 

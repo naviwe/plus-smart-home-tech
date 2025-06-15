@@ -6,8 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.enums.ProductCategory;
 import ru.yandex.practicum.model.Product;
-
-
 import java.util.Optional;
 
 @Repository

@@ -1,7 +1,6 @@
-package ru.yandex.practicum.dto;
+package ru.yandex.practicum.dto.warehouse;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,10 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChangeProductCount {
+public class ReserveProductsDto {
     @NotBlank
-    private String productId;
+    private double deliveryWeight;
     @NotBlank
-    @PositiveOrZero
-    private Long newQuantity;
+    private double deliveryVolume;
+    @NotBlank
+    private boolean fragile;
 }

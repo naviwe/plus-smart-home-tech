@@ -1,4 +1,4 @@
-package ru.yandex.practicum.dto;
+package ru.yandex.practicum.dto.shoppingstore;
 
 
 import jakarta.validation.constraints.Max;
@@ -20,26 +20,27 @@ import ru.yandex.practicum.enums.QuantityState;
 public class ProductDto {
     private String productId;
 
-    @NotBlank
+    @NotBlank(message = "Product name cannot be empty")
     private String productName;
 
-    @NotBlank
+    @NotBlank(message = "Product description cannot be empty")
     private String description;
 
     private String imageSrc;
 
-    @NotNull
+    @NotNull(message = "Quantity state cannot be null")
     private QuantityState quantityState;
 
-    @NotNull
+    @NotNull(message = "Product state cannot be null")
     private ProductState productState;
 
-    @Min(value = 1, message = "Рейтинг не может быть меньше 1")
-    @Max(value = 5, message = "Рейтинг не может быть больше 5")
+    @Min(value = 1, message = "Rating cannot be less than 1")
+    @Max(value = 5, message = "Rating cannot be greater than 5")
     private int rating;
 
+    @NotNull(message = "Product category cannot be null")
     private ProductCategory productCategory;
 
-    @Min(value = 1, message = "Стоимость не может быть меньше 1")
+    @Min(value = 1, message = "Price cannot be less than 1")
     private float price;
 }

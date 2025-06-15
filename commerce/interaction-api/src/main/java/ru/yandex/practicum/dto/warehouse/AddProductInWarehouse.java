@@ -1,4 +1,4 @@
-package ru.yandex.practicum.dto;
+package ru.yandex.practicum.dto.warehouse;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -15,6 +15,6 @@ public class AddProductInWarehouse {
     private String productId;
 
     @NotBlank
-    @Min(value = 1, message = "Количество не может быть меньше 1")
+    @Min(value = 1, message = "The quantity cannot be less than 1.")
     private int quantity;
 }

@@ -1,10 +1,13 @@
 package ru.yandex.practicum.service;
 
-import ru.yandex.practicum.dto.ChangeProductCount;
-import ru.yandex.practicum.dto.ReserveProductsDto;
-import ru.yandex.practicum.dto.CartDto;
+import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.dto.shoppingcart.ChangeProductQuantityRequest;
+import ru.yandex.practicum.dto.warehouse.ReserveProductsDto;
+import ru.yandex.practicum.dto.shoppingcart.CartDto;
 
 import java.util.Map;
+import java.util.List;
+import java.util.UUID;
 
 public interface ShoppingCartService {
     CartDto getShoppingCart(String username);
@@ -13,9 +16,10 @@ public interface ShoppingCartService {
 
     void deleteUserCart(String username);
 
-    CartDto changeCart(String username, Map<String, Long> items);
+    @Transactional
+    CartDto removeProductsFromCart(String username, List<UUID> productIds);
 
-    CartDto changeCountProductInCart(String username, ChangeProductCount request);
+    CartDto changeCountProductInCart(String username, ChangeProductQuantityRequest request);
 
     ReserveProductsDto reserveProducts(String nameUser);
 }
