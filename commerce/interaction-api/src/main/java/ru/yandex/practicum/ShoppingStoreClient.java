@@ -8,7 +8,7 @@ import ru.yandex.practicum.dto.shoppingstore.ProductDto;
 import ru.yandex.practicum.enums.ProductCategory;
 import ru.yandex.practicum.enums.QuantityState;
 
-@FeignClient(name = "shopping-store-service", url = "${shopping-store.service.url}", path = "/api/v1/shopping-store")
+@FeignClient(name = "shopping-store", path = "/api/v1/shopping-store")
 public interface ShoppingStoreClient {
 
     @GetMapping
