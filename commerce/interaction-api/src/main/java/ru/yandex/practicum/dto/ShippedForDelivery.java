@@ -1,4 +1,4 @@
-package ru.yandex.practicum.dto.warehouse;
+package ru.yandex.practicum.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -10,11 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReserveProductsDto {
+public class ShippedForDelivery {
     @NotBlank
-    private double deliveryWeight;
+    private String orderId;
+
     @NotBlank
-    private double deliveryVolume;
-    @NotBlank
-    private Boolean fragile;
+    private String deliveryId;
 }

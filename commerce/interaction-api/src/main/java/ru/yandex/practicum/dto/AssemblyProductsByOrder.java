@@ -1,4 +1,4 @@
-package ru.yandex.practicum.dto.warehouse;
+package ru.yandex.practicum.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -6,15 +6,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReserveProductsDto {
+public class AssemblyProductsByOrder {
     @NotBlank
-    private double deliveryWeight;
+    private Map<String, Long> products;
+
     @NotBlank
-    private double deliveryVolume;
-    @NotBlank
-    private Boolean fragile;
+    private String orderId;
 }
