@@ -41,7 +41,7 @@ public class DeliveryController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/failed")
     public void setDeliveryFailed(@RequestBody String deliveryId) {
-        log.info("Marking delivery {} as failed", deliveryId);
+        log.info("Marking delivery {} as faile", deliveryId);
         deliveryService.setDeliveryFailed(deliveryId);
     }
 
